@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const path = require("path");
 const cors = require('cors');
 const Sequelize = require("sequelize");
+const serverless = require("serverless-http");
 
 //-----------------------Initializatrions----------------------
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json()); // denoita que la comunicacion de datos entre servidor 
 app.use(cors({
   origin: '*'
 }));
+const router = express.Router();
 
 //----------------------Start server----------------------------
 app.listen(app.get("port"), (err) => {
@@ -59,12 +61,12 @@ const User = sequelize.define("users", {
 });
 
 //--------------------------Routes-------------------------------
-app.get("/", (requerimiento, respuesta) => {
+router.get("/", (requerimiento, respuesta) => {
   respuesta.sendFile(path.join(__dirname + "/index.html"));
 });
 
 // metodo findAll
-app.get("/findAll", (req, response) => {
+router.get("/findAll", (req, response) => {
   sequelize
     .sync()
     .then(() => {
@@ -88,7 +90,7 @@ app.get("/findAll", (req, response) => {
 });
 
 // metodo findOne
-app.get("/findOne/:userID", (req, response) => {
+router.get("/findOne/:userID", (req, response) => {
   const { userID } = req.params;
   // find one
   User.findOne({
@@ -106,7 +108,7 @@ app.get("/findOne/:userID", (req, response) => {
 });
 
 // metodo post
-app.post("/insertUser", (req, response) => {
+router.post("/insertUser", (req, response) => {
   const { userID, userName, date, punchIn, punchOut } = req.body;
   const newUser = {
     userID: userID,
@@ -127,7 +129,7 @@ app.post("/insertUser", (req, response) => {
 });
 
 // metodo put
-app.put("/updateUser/:userIDParam", (req, response) => {
+router.put("/updateUser/:userIDParam", (req, response) => {
   const { userIDParam } = req.params;
   const { userName, date, punchIn, punchOut } = req.body;
   const updateUser = {
@@ -150,7 +152,7 @@ app.put("/updateUser/:userIDParam", (req, response) => {
 });
 
 // delete
-app.delete("/deleteUser/:userID", (req, response) => {
+router.delete("/deleteUser/:userID", (req, response) => {
   const { userID } = req.params;
   User.destroy({
     returning: true,
@@ -163,5 +165,8 @@ app.delete("/deleteUser/:userID", (req, response) => {
       console.error("Failed to find instance : ", error);
     });
 });
+
+app.use('/api/', router);
+const handler = serverless(app);
 
 // iniciar servidor digitar "npm run dev" en terminal
