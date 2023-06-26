@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
+const cors = require('cors');
 const Sequelize = require("sequelize");
 
 //-----------------------Initializatrions----------------------
@@ -11,6 +12,9 @@ app.set("port", process.env.port || 3000); // denota que puerto se usa dependien
 
 //-----------------------Middlewares----------------------------
 app.use(express.json()); // denoita que la comunicacion de datos entre servidor y cliente sera en formato json
+app.use(cors({
+  origin: '*'
+}));
 
 //----------------------Start server----------------------------
 app.listen(app.get("port"), (err) => {
@@ -145,7 +149,7 @@ app.put("/updateUser/:userIDParam", (req, response) => {
     });
 });
 
-// delete put
+// delete
 app.delete("/deleteUser/:userID", (req, response) => {
   const { userID } = req.params;
   User.destroy({
